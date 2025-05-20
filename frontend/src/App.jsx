@@ -6,6 +6,7 @@ function App() {
   const webcamRef = useRef(null);
   const [result, setResult] = useState('');
   const [message, setMessage] = useState('');
+  const [audioSrc, setAudioSrc] = useState('');
   const [error, setError] = useState('');
 
   // Mapping English labels to Nepali script
@@ -30,6 +31,7 @@ function App() {
       const nepaliSign = labelMap[response.data.sign] || response.data.sign;
       setResult(nepaliSign);
       setMessage(response.data.message || '');
+      setAudioSrc(response.data.audio || '');
       setError('');
     } catch (err) {
       setError('Error sending image to backend');
@@ -61,6 +63,12 @@ function App() {
       )}
       {message && (
         <div className="text-lg text-gray-600 mt-2">{message}</div>
+      )}
+      {audioSrc && (
+        <audio controls autoPlay>
+          <source src={audioSrc} type="audio/mp3" />
+          Your browser does not support the audio element.
+        </audio>
       )}
       {error && <div className="text-red-500">{error}</div>}
     </div>

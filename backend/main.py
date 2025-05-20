@@ -38,8 +38,9 @@ transform = transforms.Compose([
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
 
-# Class names (assumed order from ImageFolder)
+# Class names (assumed order from ImageFolder) and mapping to actual audio filenames
 class_names = ['Dhanyabaad', 'Ghar', 'Ma', 'Namaskaar']
+audio_filenames = ['Dhanyabaad', 'Ghar', 'Ma', 'Namaskaar']  # Updated to match your file names
 
 @app.post("/predict")
 async def predict_sign(data: ImageData):
@@ -63,7 +64,16 @@ async def predict_sign(data: ImageData):
                 return {"sign": "", "message": "Sign not recognized—please try one of the supported signs!"}
             
             pred_class = class_names[predicted.item()]
-            return {"sign": pred_class, "message": "Prediction successful!"}
+            # Load and encode corresponding audio file
+            audio_filename = audio_filenames[predicted.item()]  # Map to actual filename
+            audio_path = f"../Audio/{audio_filename}.mp3"  # Corrected path (relative from backend/)
+            with open(audio_path, "rb") as audio_file:
+                audio_data = base64.b64encode(audio_file.read()).decode('utf-8')
+            return {
+                "sign": pred_class,
+                "message": "Prediction successful!",
+                "audio": f"data:audio/mp3;base64,{audio_data}"
+            }
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error processing image: {str(e)}")
 
